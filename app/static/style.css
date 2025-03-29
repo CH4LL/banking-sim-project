@@ -1,0 +1,78 @@
+html{
+    height:100%;
+    width:100%;
+    background-color: lightblue;
+}
+
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    height:80%;
+    width:80%;
+    margin:auto;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.main-content {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.horizontal-content{
+    width:100%;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    padding-top:2%;
+}
+
+.vertical-content{
+    display:flex;
+    flex-direction: column;
+}
+
+.category-button{
+    align-self:center;
+}
+
+.fixed-menu{
+    position:fixed;
+    top:5px;
+    right:20px;
+}
+
+.logout{
+    min-height:50px;
+    min-width: 50px;
+    font-size:26px;
+}
+
+.account-type{
+    padding:10px;
+}
+
+.simulation-results{
+    min-height:200px;
+    border: 2px solid tan;
+    padding:5px;
+}
+
+#results {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+button, div {
+    border-radius:15px;
+}

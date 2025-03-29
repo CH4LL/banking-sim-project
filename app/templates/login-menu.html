@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Bank Simulation App</title>
+</head>
+<body>
+    <div class="main-content">
+        <div class="fixed-menu">
+            <div class="horizontal-content">
+                <p class="account-type">account-type</p>
+                <button class="logout" onclick="document.location='login-menu.html'">&#x23FB;</button>
+            </div>
+        </div>
+        <h1>Bank Simulation App Prototype</h1>
+    
+        <button id="runSimulation">Run Simulation</button>
+    
+        <h2>Please login to your account</h2>
+        <div class="horizontal-content">
+            <button class="login-button" onclick="document.location='main-menu.php'">Manager</button>
+            <button class="login-button" onclick="document.location='main-menu.php'">Operator</button>
+        </div>
+    </div>
+
+
+    <script>
+        document.getElementById("runSimulation").addEventListener("click", function() {
+            // Simulate calling a backend endpoint
+            fetch("/run_simulation") // Replace with your actual API endpoint
+                .then(response => response.json()) // Expecting a JSON response
+                .then(data => {
+                    document.getElementById("resultText").textContent = "Simulation completed! Total Profit: $" + data.profit;
+                })
+                .catch(error => {
+                    console.error("Error running simulation:", error);
+                    document.getElementById("resultText").textContent = "Error running simulation.";
+                });
+        });
+    </script>
+</body>
+</html>

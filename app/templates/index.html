@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="main-content">
+        <div class="fixed-menu">
+            <div class="horizontal-content">
+                <p class="account-type">account-type</p>
+                <button class="logout" onclick="document.location='login-menu.html'">&#x23FB;</button>
+            </div>
+        </div>
+        <h1>Bank Simulation App Prototype</h1>
+    
+        <button id="runSimulation">Run Simulation</button>
+    
+        <div class="horizontal-content">
+            <div class="vertical-content">
+                <button class="category-button">Lorem</button>
+                <h2>Fetched Results</h2>
+                <div class="simulation-results">No results yet...</div>
+            </div>
+            <div class="vertical-content">
+                <button class="category-button">Lorem</button>
+                <h2>Fetched Results</h2>
+                <div class="simulation-results">No results yet...</div>
+            </div>
+            <div class="vertical-content">
+                <button class="category-button">Lorem</button>
+                <h2>Fetched Results</h2>
+                <div class="simulation-results">No results yet...</div>
+            </div>
+            <div class="vertical-content">
+                <button class="category-button">Lorem</button>
+                <h2>Fetched Results</h2>
+                <div class="simulation-results">No results yet...</div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let results = document.getElementsByClassName("simulation-results");
+        document.getElementById("runSimulation").addEventListener("click", function() {
+            // Simulate calling a backend endpoint
+            fetch("/run_simulation") // Replace with your actual API endpoint
+                .then(response => response.json()) // Expecting a JSON response
+                .then(data => {
+                    document.getElementById("resultText").textContent = "Simulation completed! Total Profit: $" + data.profit;
+                })
+                .catch(error => {
+                    console.error("Error running simulation:", error);
+                    for (let i = 0; i < results.length; i++) {
+                        results[i].textContent = "Error running simulation.";
+                    }
+                });
+        });
+    </script>
+</body>
+</html>
