@@ -15,36 +15,43 @@
             </div>
         </div>
         <h1>Bank Simulation App Prototype</h1>
+        
+        <form action="{{ url_for('run_simulation') }}" method="post">
+          <button class="simulation-button">Run Simulation</button>
+        </form>
     
-        <button id="runSimulation">Run Simulation</button>
-    
-        <div class="horizontal-content">
+              
+      <div class="horizontal-content">
+        {% if results %}
+            {% for result_value in results %}
+            <div class="vertical-content">
+                <button class="category-button">Lorem</button> <!-- Keep if needed -->
+                <h2>Fetched Results</h2>
+                <div class="simulation-results">
+                    <p>{{ result_value }}</p> <!-- Use the loop variable -->
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Maybe display 4 placeholder boxes if results is None/empty -->
+            {% for i in range(4) %} <!-- Loop 4 times -->
             <div class="vertical-content">
                 <button class="category-button">Lorem</button>
                 <h2>Fetched Results</h2>
-                <div class="simulation-results">No results yet...</div>
+                <div class="simulation-results">
+                    <p>No results yet...</p>
+                </div>
             </div>
-            <div class="vertical-content">
-                <button class="category-button">Lorem</button>
-                <h2>Fetched Results</h2>
-                <div class="simulation-results">No results yet...</div>
-            </div>
-            <div class="vertical-content">
-                <button class="category-button">Lorem</button>
-                <h2>Fetched Results</h2>
-                <div class="simulation-results">No results yet...</div>
-            </div>
-            <div class="vertical-content">
-                <button class="category-button">Lorem</button>
-                <h2>Fetched Results</h2>
-                <div class="simulation-results">No results yet...</div>
-            </div>
-        </div>
+            {% endfor %}
+        {% endif %}
+      </div>
+
+
     </div>
 
 
     <script>
-        let results = document.getElementsByClassName("simulation-results");
+        /*let results = document.getElementsByClassName("simulation-results");
         document.getElementById("runSimulation").addEventListener("click", function() {
             // Simulate calling a backend endpoint
             fetch("/run_simulation") // Replace with your actual API endpoint
@@ -58,7 +65,7 @@
                         results[i].textContent = "Error running simulation.";
                     }
                 });
-        });
+        });*/
     </script>
 </body>
 </html>
