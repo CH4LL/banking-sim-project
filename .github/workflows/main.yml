@@ -23,10 +23,10 @@ jobs:
           context: . #current directory
           file: ./Dockerfile  # Dockerfile location
           push: false # do not push the image yet
-          tags: local/banking-sim-app:lates
+          tags: local/banking-sim-app:latest
           load: true  # Load the image into Docker daemon
 
       - name: Verify image built
-        run: docker images local/banking-sim-app:latest
+        run: docker images
 
 
