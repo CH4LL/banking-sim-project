@@ -1,0 +1,32 @@
+﻿name: Build Docker Image
+
+# controls when the workflow will run
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . #current directory
+          file: ./Dockerfile  # Dockerfile location
+          push: false # do not push the image yet
+          tags: local/banking-sim-app:lates
+          load: true  # Load the image into Docker daemon
+
+      - name: Verify image built
+        run: docker images local/banking-sim-app:latest
+
+
