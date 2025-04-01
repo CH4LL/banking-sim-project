@@ -4,9 +4,6 @@
 on:
   push:
     branches: [ main ]
-  # dont want to deploy from PR
-  #pull_request:
-  #  branches: [ main ]
 
 # Define Environment Variables for GCP details
 env:
@@ -14,13 +11,16 @@ env:
   GAR_LOCATION: europe-central2     # Artifact Registry region
   SERVICE_NAME: banking-sim-service # Cloud Run name
   REGION: europe-central2           # Cloud Run region
-
+  REPOSITORY_NAME: banking-sim-repo # Define the GAR repository name
+  SERVICE_ACCOUNT_EMAIL: github-actions-agent@banking-sim-project.iam.gserviceaccount.com
 
 jobs:
   build-and-deploy:
     permissions:
       contents: read
       id-token: write # allow workflow to request OIDC token
+      # Add permission for google-github-actions/deploy-cloudrun to get the service URL
+      deployments: write 
 
     runs-on: ubuntu-latest
 
@@ -36,17 +36,40 @@ jobs:
           workload_identity_provider: 'projects/611484019882/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
           service_account: 'github-actions-agent@banking-sim-project.iam.gserviceaccount.com'
 
+      # Install gcloud needed for auth configure-docker
+      # Often included in ubuntu-latest, but good practice to ensure it's there
+      # Can be removed if builds succeed without it.
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        
+      # Configure Docker to use gcloud credential helper for GAR
+      - name: Configure Docker Credential Helper
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      # Diagnostic Step: Test impersonation directly
+      - name: Test Service Account Impersonation
+        run: |
+          echo "Attempting to generate token for ${{ env.SERVICE_ACCOUNT_EMAIL }}"
+          gcloud auth print-access-token --impersonate-service-account=${{ env.SERVICE_ACCOUNT_EMAIL }}
+          echo "Successfully generated impersonated token." # Will only run if previous command succeeds
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Build Docker image
+      # Build and Push step follows...
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and Push Docker image to GAR
+        id: build-push # Give this step an ID if needed later
         uses: docker/build-push-action@v5
         with:
-          context: . #current directory
+          context: . # current directory
           file: ./Dockerfile  # Dockerfile location
           push: true
-          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/banking-sim-repo/${{ env.SERVICE_NAME }}:latest # Tag for Artifact Registry
-          # cache-from/to: #maybe add later for optimization
+          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:latest # Tag for Artifact Registry
+          # cache-from/to: # maybe add later for optimization
 
       - name: Deploy to Cloud Run
         id: deploy # to fetch the URL later
@@ -54,17 +77,15 @@ jobs:
         with:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.REGION }}
-          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/banking-sim-repo/${{ env.SERVICE_NAME }}:latest
+          # Reference the image pushed in the previous step
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:latest
           # -- Resource & Scaling Settings --
-          memory: 512Mi        # Explicitly set default memory
-          cpu: 1               # Explicitly set default CPU
-          min-instances: 0     # Ensure it scales down to zero
-          max-instances: 1     # Safety net: Limit to only 1 concurrent instance
-          # concurrency: 80    # Max requests per instance
-
-          allow_unauthenticated: true
+          flags: >-
+            --memory=512Mi
+            --cpu=1
+            --min-instances=0
+            --max-instances=1
+            --allow-unauthenticated
 
       - name: Show Cloud Run URL
         run: "echo Cloud Run service URL: ${{ steps.deploy.outputs.url }}"
-
-
