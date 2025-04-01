@@ -1,19 +1,41 @@
-﻿name: Build Docker Image
+﻿name: Build and deploy to Cloud Run
 
 # controls when the workflow will run
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # dont want to deploy from PR
+  #pull_request:
+  #  branches: [ main ]
+
+# Define Environment Variables for GCP details
+env:
+  PROJECT_ID: banking-sim-project   # GCP project id
+  GAR_LOCATION: europe-central2     # Artifact Registry region
+  SERVICE_NAME: banking-sim-service # Cloud Run name
+  REGION: europe-central2           # Cloud Run region
+
 
 jobs:
-  build:
+  build-and-deploy:
+    permissions:
+      contents: read
+      id-token: write # allow workflow to request OIDC token
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      # Authenticate to GCP with Workload Identity Federation
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/611484019882/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-actions-agent@banking-sim-project.iam.gserviceaccount.com'
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
@@ -22,11 +44,27 @@ jobs:
         with:
           context: . #current directory
           file: ./Dockerfile  # Dockerfile location
-          push: false # do not push the image yet
-          tags: local/banking-sim-app:latest
-          load: true  # Load the image into Docker daemon
+          push: true
+          tags: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/banking-sim-repo/${{ env.SERVICE_NAME }}:latest # Tag for Artifact Registry
+          # cache-from/to: #maybe add later for optimization
 
-      - name: Verify image built
-        run: docker images
+      - name: Deploy to Cloud Run
+        id: deploy # to fetch the URL later
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/banking-sim-repo/${{ env.SERVICE_NAME }}:latest
+          # -- Resource & Scaling Settings --
+          memory: 512Mi        # Explicitly set default memory
+          cpu: 1               # Explicitly set default CPU
+          min-instances: 0     # Ensure it scales down to zero
+          max-instances: 1     # Safety net: Limit to only 1 concurrent instance
+          # concurrency: 80    # Max requests per instance
+
+          allow_unauthenticated: true
+
+      - name: Show Cloud Run URL
+        run: "echo Cloud Run service URL: ${{ steps.deploy.outputs.url }}"
 
 
