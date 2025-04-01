@@ -17,8 +17,8 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 COPY ./app /app/app
 COPY ./scripts /app/scripts
 
-# Expose the port of the Flask app
-EXPOSE 5000
+# Expose the port Cloud Run expects
+EXPOSE 8080
 
 # Define default command to run on start
-CMD [ "python", "./app/app.py" ]
+CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 --timeout 0 app.app:app

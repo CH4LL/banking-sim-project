@@ -34,24 +34,24 @@ def run_simulation():
 
     try:
         # Run the script using the same Python interpreter that runs Flask
-        # sys.executable points to the python.exe within your venv
+        # sys.executable points to the python.exe within venv
         process = subprocess.run(
             [sys.executable, script_path],
             capture_output=True,  # Capture stdout and stderr
-            text=True,            # Decode output as text (usually UTF-8)
+            text=True,            # Decode output as text
             check=True,           # Raise CalledProcessError if script exits with non-zero code
-            timeout=30            # Optional: Prevent hanging indefinitely (in seconds)
+            timeout=30            # Prevent hanging indefinitely
         )
 
-        # Process the output (printed lines from the script)
+        # Process the output
         output_lines = process.stdout.strip().splitlines()
-        # Convert captured strings to integers (or floats if needed)
+        # Convert captured strings to integers
         results = [int(line) for line in output_lines if line.strip().isdigit()]
         print(f"Script finished successfully. Output: {results}")
 
         # Store results in the session
         session['simulation_results'] = results
-        flash('Simulation ran successfully!', 'success') # Optional success message
+        flash('Simulation ran successfully!', 'success') # success message
 
     except FileNotFoundError:
         print(f"Error: Script not found at {script_path}")
@@ -70,11 +70,3 @@ def run_simulation():
 
     # Redirect back to the homepage regardless of success/failure
     return redirect(url_for('index'))
-
-# 5. Boilerplate code to make the app runnable directly with "python app/app.py"
-if __name__ == '__main__':
-    # 6. Start the Flask development server
-    #    debug=True enables auto-reloading when code changes and provides detailed error pages.
-    #    host='0.0.0.0' makes the server accessible from other devices on your network (useful for testing).
-    #                  If you omit it, it usually defaults to '127.0.0.1' (localhost), only accessible on your machine.
-    app.run(debug=True, host='0.0.0.0')

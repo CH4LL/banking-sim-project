@@ -33,7 +33,7 @@
             </div>
             {% endfor %}
         {% else %}
-            <!-- Maybe display 4 placeholder boxes if results is None/empty -->
+            <!-- Display 4 placeholder boxes if results is None/empty -->
             {% for i in range(4) %} <!-- Loop 4 times -->
             <div class="vertical-content">
                 <button class="category-button">Lorem</button>
@@ -51,21 +51,6 @@
 
 
     <script>
-        /*let results = document.getElementsByClassName("simulation-results");
-        document.getElementById("runSimulation").addEventListener("click", function() {
-            // Simulate calling a backend endpoint
-            fetch("/run_simulation") // Replace with your actual API endpoint
-                .then(response => response.json()) // Expecting a JSON response
-                .then(data => {
-                    document.getElementById("resultText").textContent = "Simulation completed! Total Profit: $" + data.profit;
-                })
-                .catch(error => {
-                    console.error("Error running simulation:", error);
-                    for (let i = 0; i < results.length; i++) {
-                        results[i].textContent = "Error running simulation.";
-                    }
-                });
-        });*/
     </script>
 </body>
 </html>
