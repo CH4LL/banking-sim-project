@@ -1,17 +1,13 @@
-# 1. Import necessary parts from the Flask library
 from flask import Flask, render_template, redirect, url_for, session, flash
 import subprocess
 import sys
 import os
 import secrets
 
-# 2. Create an instance of the Flask application
-#    __name__ tells Flask where to look for resources like templates and static files.
 app = Flask(__name__)
 # IMPORTANT: Remeber to change this to a real random key in production
 app.secret_key = secrets.token_hex(16)
 
-# 3. Define a "route" - what happens when someone visits the main URL ('/')
 @app.route('/')
 def index():
     #render main page
@@ -33,8 +29,6 @@ def run_simulation():
     print(f"Attempting to run script: {script_path}")
 
     try:
-        # Run the script using the same Python interpreter that runs Flask
-        # sys.executable points to the python.exe within venv
         process = subprocess.run(
             [sys.executable, script_path],
             capture_output=True,  # Capture stdout and stderr
